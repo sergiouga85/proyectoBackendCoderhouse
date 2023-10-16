@@ -76,6 +76,8 @@ class ProductsManager{
 const pm= new ProductsManager()
 
 try{
+    console.log(pm.getProducts().map((p)=>p.asPOJO()))
+    
     const p1= pm.addProducts({title:'Arroz', description:'legunbre', price: 150, thumbnail:'sin imagen', code: 'ACB1',   stock: 10})
     const p2= pm.addProducts({title: 'Arbejas', description:'legunbre', price: 200, thumbnail: 'sin imagen', code: 'ACB2', stock: 5})
     const p3= pm.addProducts({title:'Aceite', description:'aceite de cocina', price: 600, thumbnail:'sin imagen' , code: 'ACB3', stock: 15})
