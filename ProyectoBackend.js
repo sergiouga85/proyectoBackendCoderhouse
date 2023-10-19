@@ -1,7 +1,9 @@
+
+const {promises:fs} = require ('fs')
+const { json } = require('stream/consumers')
+
 class Product{
-
-    #stock
-
+ 
     constructor({id,title,description,price,thumbnail,code,stock}){
         this.id = id
         this.title= title
@@ -16,40 +18,54 @@ class Product{
         if(nuevoStock < 0){
             throw new Error ('El stock no puede ser menor a cero')
         }
-        this.#stock= nuevoStock
+        this.stock= nuevoStock
     }
 
     getStock(){
-        return this.#stock
+        return this.stock
     } 
 
-    asPOJO(){
-        return{
-            id:this.id,
-            title:this.title,
-            description:this.description,
-            price:this.price,
-            thumbnail:this.thumbnail,
-            code:this.code,
-            stock:this.#stock  
-        }
-    }
+    
 }
 
 class ProductsManager{
 
-    static #ultimoId=0
+    static #ultimoId= 0
     #products
 
-    constructor(){
+    constructor({path}){
+        this.path=path
         this.#products=[]
+    }
+
+    async init(){
+        try{
+        await this.#writeProducts()
+        }catch{
+            await this.#writeProducts()
+        }
+        if(this.#products.length ==0){
+            ProductsManager.#ultimoId=0
+        }else{
+            ProductsManager.#ultimoId = this.#products.at(-1).id
+        }
+
     }
 
     static #generarNuevoId(){
         return ++ProductsManager.#ultimoId
     }
 
-    addProducts({title,description,price,thumbnail,code,stock}){
+    async #readProducts(){
+        const productsEnJson = await fs.readFile(this.path,'utf-8')
+        this.#products = JSON.parse(productsEnJson)
+    }
+
+    async #writeProducts(){
+        await fs.writeFile(this.path,JSON.stringify(this.#products))
+    }
+
+    async addProducts({title,description,price,thumbnail,code,stock}){
 
         if(!title || !description || !price || !thumbnail || !code || !stock){
             throw new Error('Todos los campos son obligatorios');
@@ -58,11 +74,14 @@ class ProductsManager{
         if(productCode) throw new Error('Otro producto ya fue agregado con ese codigo')
         const id= ProductsManager.#generarNuevoId()
         const product=new Product({id,title,description,price,thumbnail,code,stock})
+        await this.#readProducts()
         this.#products.push(product)
+        await this.#writeProducts()
         return product
     }
 
-    getProducts(){
+    async getProducts(){
+        await this.#readProducts()
         return this.#products
     }
 
@@ -71,30 +90,43 @@ class ProductsManager{
        if(!productId) throw new Error('Not found')
        return productId
     }
+
+    async updateProducts(id,{title,description,price,thumbnail,code,stock}){
+         const index = this.#products.findIndex((p)=>p.id === id)
+        if(index != -1){
+            await this.#readProducts()
+            this.#products[index] = new Product({id,title,description,price,thumbnail,code,stock});
+            await this.#writeProducts()
+            return this.#products
+        }
+    }
+
+    async deleteProducts(id){
+        const index = this.#products.findIndex((p)=>p.id === id)
+        if(index != -1){
+            await this.#readProducts()
+            this.#products.splice(index,1)
+            this.#products.forEach((p, i) => {
+                p.id = ++i;
+              });
+            await this.#writeProducts()
+            return this.#products
+        }
+    }
 }
 
-const pm= new ProductsManager()
-
-try{
-    console.log(pm.getProducts().map((p)=>p.asPOJO()))
+async function main(){
     
-    const p1= pm.addProducts({title:'Arroz', description:'legunbre', price: 150, thumbnail:'sin imagen', code: 'ACB1',   stock: 10})
-    const p2= pm.addProducts({title: 'Arbejas', description:'legunbre', price: 200, thumbnail: 'sin imagen', code: 'ACB2', stock: 5})
-    const p3= pm.addProducts({title:'Aceite', description:'aceite de cocina', price: 600, thumbnail:'sin imagen' , code: 'ACB3', stock: 15})
-    const p4= pm.addProducts({title:'Sal', description:'condimento', price: 300,  thumbnail: 'sin imagen', code: 'ACB4', stock: 25})
-    
-    console.log(pm.getProducts().map((p)=>p.asPOJO()))
-   
-}
-catch(error){
-    console.log(error.message)
+    const pm= new ProductsManager({path:'products.json'})
+    await pm.init()
+    const p1= await pm.addProducts({title:'Arroz', description:'legunbre', price: 150, thumbnail:'sin imagen', code: 'ACB1', stock: 10})
+    const p3= await pm.addProducts({title:'Aceite', description:'aceite de cocina', price: 600, thumbnail:'sin imagen' , code: 'ACB3', stock: 15})
+    console.log( await pm.getProducts()) 
+    const productoUpdate= await pm.updateProducts(1,{title: 'Arbejas', description:'legunbre', price: 200, thumbnail: 'sin imagen', code: 'ACB2', stock: 5})
+    console.log( await pm.getProducts()) 
+    const productDelete= await pm.deleteProducts(1)
+    console.log( await pm.getProducts()) 
 }
 
-try{
-    const productoId= pm.getProductsById(1).asPOJO()
-    console.log(productoId)
-}
-catch(error){
-    console.log(error.message)
-}
+main()
 
