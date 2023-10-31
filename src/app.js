@@ -7,7 +7,7 @@ const pm= new ProductsManager(PRODUCTOS_JSON)
 const app=express()
 
 app.get('/products',async (req, res)=>{
-    const limit=req.query.limit;
+    const limit=parseInt(String(req.query.limit));
     try{
         const products= await pm.getAll({limit})
         res.json(products)

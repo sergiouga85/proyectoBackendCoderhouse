@@ -10,12 +10,12 @@ export class ProductsManager{
         const json = await fs.readFile(this.ruta,'utf-8')
         const {limit}=query
         const data=JSON.parse(json)
-        if(limit){
-            if(limit>data.length){
-                throw new Error('Limite invalido')
-            }
-            return data.slice(0, parseInt(limit));
+        
+        if(limit>data.length || parseInt(limit)<=0){
+            throw new Error('Limite invalido')
         }
+        return data.slice(0, parseInt(limit));
+        
         return data
     }
 
