@@ -3,7 +3,7 @@
   "name": "proyectobackendcoderhouse",
   "version": "1.0.0",
   "description": "",
-  "main": "cliente.js",
+  "main": "app.js",
   "scripts": {},
   "author": "",
   "license": "ISC",
