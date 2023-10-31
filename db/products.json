@@ -1,0 +1,47 @@
+[
+    {   
+        "id":1,
+        "title":"Nodemcu ESP 8266",
+        "description":"Placa electronica de desarrollo",
+        "price":5500,
+        "thumbnail":"sin imagen",
+        "code":"ACB1",
+        "stock":10
+    },
+    {
+        "id":2,
+        "title":"Arduino Uno", 
+        "description":"Placa de desarrollo Electronica", 
+        "price": 5500, 
+        "thumbnail":"sin imagen", 
+        "code": "ACB2", 
+        "stock": 10
+    },
+    {   
+        "id":3,
+        "title": "Amplificador Stereo TPA 3116", 
+        "description":"modulo Amplificador de Audio 100W", 
+        "price": 22500, 
+        "thumbnail": "sin imagen", 
+        "code": "ACB3", 
+        "stock": 10
+    },
+    {   
+        "id":4,
+        "title": "Fuente Gadnic", 
+        "description":"fuente de laboratorio 0-30v 5 amper regulable", 
+        "price": 100000, 
+        "thumbnail": "sin imagen", 
+        "code": "ACB4", 
+        "stock": 6
+    },
+    {   
+        "id":5,
+        "title": "Multimetro digital Uni-T", 
+        "description":"Multimetro digital Uni-T UT33D", 
+        "price": 18000, 
+        "thumbnail": "sin imagen", 
+        "code": "ACB5", 
+        "stock": 8
+    }
+]

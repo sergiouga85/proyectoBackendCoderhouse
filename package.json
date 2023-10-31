@@ -1,0 +1,13 @@
+{
+  "type": "module",
+  "name": "proyectobackendcoderhouse",
+  "version": "1.0.0",
+  "description": "",
+  "main": "cliente.js",
+  "scripts": {},
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}

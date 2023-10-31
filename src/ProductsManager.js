@@ -1,41 +1,38 @@
-
-const {promises:fs} = require ('fs')
-const { json } = require('stream/consumers')
-
-class Product{
+import fs from 'fs/promises'
  
-    constructor({id,title,description,price,thumbnail,code,stock}){
-        this.id = id
-        this.title= title
-        this.description=description
-        this.price=price
-        this.thumbnail=thumbnail
-        this.code=code
-        this.setStock(stock)
-    }
-
-    setStock(nuevoStock){
-        if(nuevoStock < 0){
-            throw new Error ('El stock no puede ser menor a cero')
-        }
-        this.stock= nuevoStock
-    }
-
-    getStock(){
-        return this.stock
-    } 
-
-    
-}
-
-class ProductsManager{
+export class ProductsManager{
 
     static #ultimoId= 0
     #products
 
-    constructor({path}){
-        this.path=path
-        this.#products=[]
+    constructor(ruta){
+        this.ruta=ruta
+    }
+
+    async getAll(query={}){
+        const json = await fs.readFile(this.ruta,'utf-8')
+        const {limit}=query
+        const data=JSON.parse(json)
+        if(limit){
+            if(limit>data.length){
+                throw new Error('Limite invalido')
+            }
+            return data.slice(0, parseInt(limit));
+        }
+        return data
+    }
+
+    async getById(id){
+        const json= await fs.readFile(this.ruta, 'utf-8')
+        const products= JSON.parse(json)
+        return products.find(p=> p.id === id)
+    }
+        
+
+    async #readProducts(){
+        const productsEnJson = await fs.readFile(this.ruta,'utf-8')
+        this.#products = JSON.parse(productsEnJson)
+
     }
 
     async init(){
@@ -56,11 +53,6 @@ class ProductsManager{
         return ++ProductsManager.#ultimoId
     }
 
-    async #readProducts(){
-        const productsEnJson = await fs.readFile(this.path,'utf-8')
-        this.#products = JSON.parse(productsEnJson)
-    }
-
     async #writeProducts(){
         await fs.writeFile(this.path,JSON.stringify(this.#products))
     }
@@ -73,7 +65,7 @@ class ProductsManager{
         const productCode= this.#products.find((p)=>p.code===code)
         if(productCode) throw new Error('Otro producto ya fue agregado con ese codigo')
         const id= ProductsManager.#generarNuevoId()
-        const product=new Product({id,title,description,price,thumbnail,code,stock})
+        const product= new Product({id,title,description,price,thumbnail,code,stock})
         await this.#readProducts()
         this.#products.push(product)
         await this.#writeProducts()
@@ -114,19 +106,3 @@ class ProductsManager{
         }
     }
 }
-
-async function main(){
-    
-    const pm= new ProductsManager({path:'products.json'})
-    await pm.init()
-    const p1= await pm.addProducts({title:'Arroz', description:'legunbre', price: 150, thumbnail:'sin imagen', code: 'ACB1', stock: 10})
-    const p3= await pm.addProducts({title:'Aceite', description:'aceite de cocina', price: 600, thumbnail:'sin imagen' , code: 'ACB3', stock: 15})
-    console.log( await pm.getProducts()) 
-    const productoUpdate= await pm.updateProducts(1,{title: 'Arbejas', description:'legunbre', price: 200, thumbnail: 'sin imagen', code: 'ACB2', stock: 5})
-    console.log( await pm.getProducts()) 
-    const productDelete= await pm.deleteProducts(1)
-    console.log( await pm.getProducts()) 
-}
-
-main()
-
