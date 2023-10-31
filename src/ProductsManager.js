@@ -2,9 +2,6 @@ import fs from 'fs/promises'
  
 export class ProductsManager{
 
-    static #ultimoId= 0
-    #products
-
     constructor(ruta){
         this.ruta=ruta
     }
